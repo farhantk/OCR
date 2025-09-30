@@ -32,7 +32,7 @@ A modern web application that combines **Tesseract OCR** for text extraction fro
 ### 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/farhantk/OCR.git
 cd OCR
 ```
 
@@ -127,7 +127,7 @@ ollama run llama3.2:3b "Hello, test response in Indonesian"
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone git clone https://github.com/farhantk/OCR.git
    cd OCR
    ```
 
@@ -322,50 +322,6 @@ ollama pull llama3.2:1b
 export LLAMA_MODEL=llama3.2:1b
 ```
 
-#### For Faster Processing
-```bash
-# Pre-load the AI model
-ollama run llama3.2:3b "warmup"
-
-# Use SSD storage for Docker
-# Configure Docker to use SSD location
-```
-
-### Logs and Debugging
-
-```bash
-# View all logs
-docker-compose logs -f
-
-# View backend logs only
-docker-compose logs -f backend
-
-# View frontend logs only
-docker-compose logs -f frontend
-
-# Check system resources
-docker stats
-```
-
-## 🏗️ Development
-
-### Local Development Setup
-
-```bash
-# Clone repository
-git clone <repo-url>
-cd OCR
-
-# Backend development
-cd backend
-npm install
-npm run dev
-
-# Frontend development (separate terminal)
-cd frontend
-npm install
-npm run dev
-```
 
 ### Project Structure
 
@@ -387,18 +343,6 @@ OCR/
 └── README.md             # This file
 ```
 
-### Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) - OCR engine
@@ -408,17 +352,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Express.js](https://expressjs.com/) - Backend framework
 - [Tailwind CSS](https://tailwindcss.com/) - Styling framework
 
-## 🆘 Support
-
-If you encounter any issues:
-
-1. Check the [Troubleshooting](#-troubleshooting) section
-2. Search existing [GitHub Issues](issues)
-3. Create a new issue with:
-   - System information
-   - Error logs
-   - Steps to reproduce
-
----
-
-**Made with ❤️ by the OCR Team**
