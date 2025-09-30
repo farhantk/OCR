@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 export default function App() {
   const [file, setFile] = useState(null);
   const [lang, setLang] = useState('eng');
+  const [aiModel, setAiModel] = useState('ollama');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [analysis, setAnalysis] = useState(null);
@@ -35,8 +36,9 @@ export default function App() {
     setAnalysis(null);
     
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('lang', lang);
+  formData.append('file', file);
+  formData.append('lang', lang);
+  formData.append('aiModel', aiModel);
 
     try {
       const response = await fetch(`${apiBase}/api/upload`, { 
@@ -107,7 +109,7 @@ export default function App() {
               )}
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-end gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   OCR Language
@@ -122,9 +124,21 @@ export default function App() {
                   <option value="ind">Indonesian (ind)</option>
                 </select>
               </div>
-              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  AI Model
+                </label>
+                <select
+                  value={aiModel}
+                  onChange={e => setAiModel(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={loading}
+                >
+                  <option value="ollama">Ollama (Llama)</option>
+                  <option value="claude">Claude (Anthropic)</option>
+                </select>
+              </div>
               <div className="flex-1"></div>
-              
               <button 
                 type="submit" 
                 className={`px-6 py-3 rounded-md font-medium transition-colors ${

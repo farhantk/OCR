@@ -14,6 +14,61 @@ require('fs').mkdirSync(uploadDir, { recursive: true });
 
 const LLAMA_API_URL = process.env.LLAMA_API_URL || 'http://localhost:11434/api/generate';
 const LLAMA_MODEL = process.env.LLAMA_MODEL || 'llama3.2:3b';
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
+const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+async function getClaudeAnalysis(ocrText) {
+  console.log('ANTHROPIC_API_KEY:', ANTHROPIC_API_KEY);
+  try {
+    const maxTextLength = 2000;
+    const truncatedText = ocrText.length > maxTextLength
+      ? ocrText.substring(0, maxTextLength) + "..."
+      : ocrText;
+
+    const prompt = `Analisis teks berikut dari hasil OCR. Berikan penjelasan singkat dan ringkasan dalam bahasa Indonesia:\n\nTeks:\n"""\n${truncatedText}\n"""\n\nJawab dalam format:\nPenjelasan: [penjelasan singkat tentang isi dokumen]\nRingkasan:\n- [poin 1]\n- [poin 2]\n- [poin 3]`;
+
+    const response = await axios.post(ANTHROPIC_API_URL, {
+      model: "claude-3-haiku-20240307", // default, bisa diganti sesuai kebutuhan
+      max_tokens: 500,
+      temperature: 0.3,
+      messages: [
+        { role: "user", content: prompt }
+      ]
+    }, {
+      headers: {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
+      },
+      timeout: 60000
+    });
+
+    if (response.data && response.data.content && response.data.content.length > 0) {
+      const fullResponse = response.data.content[0].text.trim();
+      const penjelasanMatch = fullResponse.match(/Penjelasan:\s*(.*?)(?=Ringkasan:|$)/is);
+      const ringkasanMatch = fullResponse.match(/Ringkasan:\s*(.*)/is);
+      return {
+        penjelasan: penjelasanMatch ? penjelasanMatch[1].trim() : "Dokumen berhasil dianalisis",
+        ringkasan: ringkasanMatch ? ringkasanMatch[1].trim() : fullResponse
+      };
+    }
+    return {
+      penjelasan: "Tidak dapat menganalisis dokumen",
+      ringkasan: "Response kosong dari Claude"
+    };
+  } catch (error) {
+    console.error('Claude API error:', error.message);
+    let errorMessage = "Layanan Claude tidak tersedia saat ini";
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = "Claude service tidak berjalan";
+    } else if (error.code === 'ECONNRESET' || error.message.includes('timeout')) {
+      errorMessage = "Claude membutuhkan waktu terlalu lama, coba dengan teks yang lebih pendek";
+    }
+    return {
+      penjelasan: "Gagal menganalisis dokumen dengan Claude",
+      ringkasan: errorMessage
+    };
+  }
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
@@ -226,15 +281,21 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     }
     await fs.unlink(filePath).catch(() => {});
 
-    let llamaAnalysis = null;
+
+    let aiAnalysis = null;
     if (finalText && finalText.trim().length > 10) {
-      console.log(`OCR completed. Text length: ${finalText.length} characters. Starting AI analysis...`);
+      const aiModel = req.body.aiModel || 'ollama';
+      console.log(`OCR completed. Text length: ${finalText.length} characters. Starting AI analysis with model: ${aiModel}`);
       try {
-        llamaAnalysis = await getLlamaAnalysis(finalText);
+        if (aiModel === 'claude') {
+          aiAnalysis = await getClaudeAnalysis(finalText);
+        } else {
+          aiAnalysis = await getLlamaAnalysis(finalText);
+        }
         console.log('AI analysis completed successfully');
       } catch (analysisError) {
         console.error('AI analysis failed:', analysisError.message);
-        llamaAnalysis = {
+        aiAnalysis = {
           penjelasan: "AI analysis error",
           ringkasan: "Terjadi kesalahan saat menganalisis dokumen dengan AI"
         };
@@ -245,7 +306,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 
     res.json({ 
       text: finalText,
-      analysis: llamaAnalysis,
+      analysis: aiAnalysis,
       metadata: {
         filename: req.file.originalname,
         fileSize: req.file.size,

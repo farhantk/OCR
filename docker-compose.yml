@@ -1,5 +1,4 @@
 services:
-  # Backend service - Node.js + Tesseract OCR
   backend:
     build: ./backend
     container_name: ocr-backend
@@ -8,6 +7,8 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    env_file:
+      - ./backend/.env
     environment:
       - LLAMA_API_URL=http://host.docker.internal:11434/api/generate
       - LLAMA_MODEL=llama3.2:3b
@@ -21,7 +22,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # Frontend service - React + Nginx
   frontend:
     build: ./frontend
     container_name: ocr-frontend
@@ -38,7 +38,6 @@ services:
       timeout: 10s
       retries: 3
 
-# Networks
 networks:
   default:
     name: ocr-network
