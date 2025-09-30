@@ -32,7 +32,7 @@ A modern web application that combines **Tesseract OCR** for text extraction fro
 ### 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/farhantk/OCR.git
 cd OCR
 ```
 
@@ -127,7 +127,7 @@ ollama run llama3.2:3b "Hello, test response in Indonesian"
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone git clone https://github.com/farhantk/OCR.git
    cd OCR
    ```
 
